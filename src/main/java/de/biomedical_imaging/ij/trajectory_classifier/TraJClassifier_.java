@@ -181,9 +181,9 @@ public class TraJClassifier_ implements PlugIn {
 			//Show GUI
 			GenericDialog gd = new GenericDialog("TraJectory Classification ("+classifierVersion+")");
 		
-			gd.addSlider("Min._track_length", 10, 1000, minTrackLength);
-			gd.addSlider("Window_size (positions)", 10, 1000, windowSizeClassification);
-			gd.addSlider("Min._segment_length",10,1000,minSegmentLength);
+			gd.addSlider("Min._track_length", 4, 1000, minTrackLength);
+			gd.addSlider("Window_size (positions)", 4, 1000, windowSizeClassification);
+			gd.addSlider("Min._segment_length",4,1000,minSegmentLength);
 			gd.addNumericField("Resample rate*", resampleRate, 0);
 			gd.addNumericField("Pixelsize (µm)**", pixelsize, 4);
 			gd.addNumericField("Framerate (FPS)", 1/timelag, 0);
@@ -210,7 +210,7 @@ public class TraJClassifier_ implements PlugIn {
 					removeGlobalDrift = gd.getNextBoolean();
 					boolean valid = (resampleRate == 1 || windowSizeClassification/resampleRate>=30) && 
 							(minTrackLength >= windowSizeClassification) &&
-							(minTrackLength>=10) && (minSegmentLength>=10) && (windowSizeClassification>=10);
+							(minTrackLength>=4) && (minSegmentLength>=4) && (windowSizeClassification>=4);
 					
 					return valid;
 				}
@@ -307,8 +307,8 @@ public class TraJClassifier_ implements PlugIn {
 		/*
 		 * Classification and segmentation
 		 */
-		
-		classifiedSegments = classifyAndSegment(parentTrajectories, modelpath, windowSizeClassification, minSegmentLength, 10, resampleRate);
+		int modeFilterLength = windowSizeClassification;
+		classifiedSegments = classifyAndSegment(parentTrajectories, modelpath, windowSizeClassification, minSegmentLength, modeFilterLength, resampleRate);
 
 
 		/*
