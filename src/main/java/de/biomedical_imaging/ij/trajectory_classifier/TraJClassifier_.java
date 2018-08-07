@@ -77,6 +77,7 @@ import ij.gui.TextRoi;
 import ij.io.OpenDialog;
 import ij.measure.ResultsTable;
 import ij.plugin.PlugIn;
+import static java.lang.Math.min;
 
 public class TraJClassifier_ implements PlugIn {
 
@@ -182,17 +183,18 @@ public class TraJClassifier_ implements PlugIn {
 			GenericDialog gd = new GenericDialog("TraJectory Classification ("+classifierVersion+")");
 		
 			gd.addSlider("Min._track_length", 4, 1000, minTrackLength);
-			gd.addSlider("Window_size (positions)", 4, 1000, windowSizeClassification);
+			gd.addSlider("Window_size (positions)*", 4, 1000, windowSizeClassification);
 			gd.addSlider("Min._segment_length",4,1000,minSegmentLength);
-			gd.addNumericField("Resample rate*", resampleRate, 0);
-			gd.addNumericField("Pixelsize (µm)**", pixelsize, 4);
+			gd.addNumericField("Resample rate**", resampleRate, 0);
+			gd.addNumericField("Pixelsize (µm)***", pixelsize, 4);
 			gd.addNumericField("Framerate (FPS)", 1/timelag, 0);
 			gd.addCheckbox("Use reduced model confined motion", useReducedModelConfinedMotion);
 			gd.addCheckbox("Show_IDs", showID);
 			gd.addCheckbox("Show_overview classes", showOverviewClasses);
 			gd.addCheckbox("Remove_global_drift", removeGlobalDrift);
-			gd.addMessage("* The ratio of window size / resample rate have to be at least 30.");
-			gd.addMessage("** Set to zero if the imported data is already correctly scaled.");
+                        gd.addMessage("* Must be even.");
+			gd.addMessage("** The ratio of window size / resample rate have to be at least 30.");
+			gd.addMessage("*** Set to zero if the imported data is already correctly scaled.");                      
 			gd.addHelp("http://imagej.net/TraJClassifier");
 			gd.addDialogListener(new DialogListener() {
 				
@@ -210,7 +212,7 @@ public class TraJClassifier_ implements PlugIn {
 					removeGlobalDrift = gd.getNextBoolean();
 					boolean valid = (resampleRate == 1 || windowSizeClassification/resampleRate>=30) && 
 							(minTrackLength >= windowSizeClassification) &&
-							(minTrackLength>=4) && (minSegmentLength>=4) && (windowSizeClassification>=4);
+							(minTrackLength>=4) && (minSegmentLength>=4) && (windowSizeClassification>=4) && (windowSizeClassification % 2 == 0);
 					
 					return valid;
 				}
@@ -307,7 +309,8 @@ public class TraJClassifier_ implements PlugIn {
 		/*
 		 * Classification and segmentation
 		 */
-		int modeFilterLength = windowSizeClassification;
+		int modeFilterLength = min(windowSizeClassification,10);// if windowSize is <10 have to use smaller value than default - sensible results not guaranteed
+                
 		classifiedSegments = classifyAndSegment(parentTrajectories, modelpath, windowSizeClassification, minSegmentLength, modeFilterLength, resampleRate);
 
 
@@ -392,7 +395,7 @@ public class TraJClassifier_ implements PlugIn {
 					IJ.log("Type: " + t.getType());
 					ExportImportTools eit = new ExportImportTools();
 					ArrayList<Trajectory> hlp = new ArrayList<Trajectory>();
-					eit.exportTrajectoryDataAsCSV(hlp, "/home/thorsten/bad.csv");
+					eit.exportTrajectoryDataAsCSV(hlp, "C:\\Users\\nsh167\\Documents\\development\\github\\Netbeans\\ij-trajectory-classifier\\bad.csv");
 					IJ.log(t.toString());
 					
 				}
